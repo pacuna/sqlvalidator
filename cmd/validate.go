@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 Pablo Acuna <pacuna@pm.me>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,25 +16,37 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"errors"
 
+	"github.com/antlr/antlr4/runtime/Go/antlr"
+	"github.com/pacuna/sqlvalidator/parser"
 	"github.com/spf13/cobra"
 )
 
 // validateCmd represents the validate command
 var validateCmd = &cobra.Command{
 	Use:   "validate",
-	Short: "A brief description of your command",
+	Short: "Check if a query contains syntax errors",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("validate called")
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires a query argument")
+		}
+		return nil
 	},
-}
+	Run: func(cmd *cobra.Command, args []string) {
+		input := antlr.NewInputStream(args[0])
+		lexer := parser.NewHiveLexer(input)
+		stream := antlr.NewCommonTokenStream(lexer, 0)
+		p := parser.NewHiveParser(stream)
+		p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+		p.Statement()
+	}}
 
 func init() {
 	rootCmd.AddCommand(validateCmd)
