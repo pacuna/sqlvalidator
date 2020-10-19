@@ -17,7 +17,8 @@ package cmd
 
 import (
 	"github.com/antlr/antlr4/runtime/Go/antlr"
-	"github.com/pacuna/sqlvalidator/parser"
+	"github.com/pacuna/sqlvalidator/parser/hive"
+	"github.com/pacuna/sqlvalidator/parser/mysql"
 	"github.com/spf13/cobra"
 )
 
@@ -36,11 +37,18 @@ to quickly create a Cobra application.`,
 		switch dialect {
 		case "hive":
 			input := antlr.NewInputStream(args[0])
-			lexer := parser.NewHiveLexer(input)
+			lexer := hive.NewHiveLexer(input)
 			stream := antlr.NewCommonTokenStream(lexer, 0)
-			p := parser.NewHiveParser(stream)
+			p := hive.NewHiveParser(stream)
 			p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 			p.Statement()
+		case "mysql":
+			input := antlr.NewInputStream(args[0])
+			lexer := mysql.NewMySqlLexer(input)
+			stream := antlr.NewCommonTokenStream(lexer, 0)
+			p := mysql.NewMySqlParser(stream)
+			p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+			p.Root()
 		}
 	}}
 
