@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
-
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	"github.com/pacuna/sqlvalidator/parser"
 	"github.com/spf13/cobra"
@@ -33,20 +31,22 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("requires a query argument")
-		}
-		return nil
-	},
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		input := antlr.NewInputStream(args[0])
-		lexer := parser.NewHiveLexer(input)
-		stream := antlr.NewCommonTokenStream(lexer, 0)
-		p := parser.NewHiveParser(stream)
-		p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
-		p.Statement()
+		switch dialect {
+		case "hive":
+			input := antlr.NewInputStream(args[0])
+			lexer := parser.NewHiveLexer(input)
+			stream := antlr.NewCommonTokenStream(lexer, 0)
+			p := parser.NewHiveParser(stream)
+			p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+			p.Statement()
+		}
 	}}
+
+var (
+	dialect string
+)
 
 func init() {
 	rootCmd.AddCommand(validateCmd)
@@ -59,5 +59,8 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// validateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//var dialect string
+	validateCmd.PersistentFlags().StringVar(&dialect, "dialect", "", "dialect to validate the query against")
+	validateCmd.MarkFlagRequired("dialect")
+
 }
