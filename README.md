@@ -1,5 +1,7 @@
 # sqlvalidator
-Validates SQL against different dialects
+Validates SQL against different dialects.
+
+Experiment using the Golang antlr4 target.
 
 # Examples
 
